@@ -26,7 +26,7 @@ const handleMessage = (bytes, uuid) => {
 
     broadcast()
 
-    console.log(message)
+    console.log(`${user.username} updated their state: `, message)
 }
 
 const handleClose = uuid =>{
