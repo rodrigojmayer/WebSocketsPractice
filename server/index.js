@@ -1,11 +1,11 @@
 const http = require('http')
-const {WebSocketServer} = require('ws')
+const {WebSocketServer} = require('ws') // Importing the ws module
 
 const url = require('url')
 const uuidv4 = require('uuid').v4
 
 const server = http.createServer()
-const wsServer = new WebSocketServer({ server })
+const wsServer = new WebSocketServer({ server }) // Then we pass to this constructor an options property where one of the options is server
 const port = 8000
 
 const connections = { }
@@ -40,7 +40,7 @@ const handleClose = uuid =>{
     broadcast()
 }
 
-wsServer.on("connection", (connection, request) => {
+wsServer.on("connection", (connection, request) => {    // This is a type of event. When this event happens we would please like to call this callback function which passes the connection and the request
     // ws://localhost:8000?username=Alex
 
     const { username } = url.parse(request.url, true).query
