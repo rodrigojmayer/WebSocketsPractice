@@ -1,5 +1,7 @@
 # WebSocketsPractice
 
+##############################################  Server Side  ##############################################
+
 uuid: First in the server side we must install the uuid module wich stands for universally unique identifier.
     npm i --save ws uuid
 
@@ -48,7 +50,8 @@ We will also track users, setting the data that interests to us, because each co
     users[uuid] = {
         username,
         state: {
-
+            x: 0,
+            y: 0
         }
     }
 
@@ -93,3 +96,46 @@ Again outside the wsServer.on connection function we declare the close events ha
 
         broadcast()
     }
+
+    
+
+##############################################  Client Side  ##############################################
+
+First in the client side we must isntall  the modules react-use-websocket, lodash.throttle and for this case perfect-cursors
+    npm i react-use-websocket lodash.throttle perfect-cursors
+
+import the react-use-websocket module in the file that we are going to use websocket
+    import useWebSocket from 'react-use-websocket'
+
+Inside of the component we're going to call the websocket hook. The first option used websocket takes is a URL to the websocket server. The second argument is an options object, where we can set all kinds of options. One of those options which you might need in your project is share. The only option we need is the one called queryParams, this enables us to pass the username as a query parameter to the server 
+    const WS_URL = import.meta.env.VITE_WS_URL
+    const { sendJsonMessage, lastJsonMessage } = useWebSocket(WS_URL, {
+        queryParams: { username }
+    })
+
+Add in useEffect hook the event listener for the mousemove, using the function throttle from the module lodash.throttle to give an interval of time between each event.
+    import throttle from 'lodash.throttle'
+
+
+    const THROTTLE = 50     // milliseconds for interval
+    const sendJsonMessageThrottled = throttle(sendJsonMessage, THROTTLE)
+
+    useEffect(() => {
+        window.addEventListener("mousemove", e => {
+            sendJsonMessageThrottled({
+                x: e.clientX,
+                y: e.clientY
+            })
+        })
+    }, [])
+
+Is a small problem here, which is that effectively the function of the component is going to run every single time the component renders, this is every time something changes in the application State and in this case will be literally every millisecond with live cursors because they're moving all the time. And that means is that we'll be calling this throttle function essentially over and over again. And that's a bit of a problem because it's going to affect the internal timer and it's just not going to work as expected. If we want to hold on to a reference between renders and not keep record calling it, that's when we use useRef.
+    import { useEffect, useRef } from 'react'
+
+
+    const sendJsonMessageThrottled = useRef(throttle(sendJsonMessage, THROTTLE))
+
+
+    sendJsonMessageThrottled.current({    //  Whenever you wrap up a function like so, you can't just return the function, actually returns an object with a property called current that represents the method that is throttled in this case
+        x: ...
+    })
